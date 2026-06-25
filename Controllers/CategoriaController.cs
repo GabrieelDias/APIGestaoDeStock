@@ -1,5 +1,6 @@
 ﻿using FluxoDeEstoque.Data;
 using FluxoDeEstoque.Models;
+using FluxoDeEstoque.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,74 +11,51 @@ namespace FluxoDeEstoque.Controllers
     [ApiController]
     public class CategoriaController : ControllerBase
     {
-        private readonly AppDbContext _appDbContext;
+        private readonly ICategoriaService _service;
 
-        public CategoriaController(AppDbContext appDbContext)
+
+        public CategoriaController(ICategoriaService service) 
         {
-            _appDbContext = appDbContext;
+            _service = service;
         }
 
         [HttpGet("/api/categorias")]
-        public async Task<ActionResult<IEnumerable<Categoria>>> GetTodasCategorias()
+        public async Task<IActionResult> GetTodasCategorias()
         {
-            return await _appDbContext.Categorias.ToListAsync();
-        }
-
-        [HttpGet("/api/categorias/{id}")]
-        public async Task<ActionResult<Categoria>> GetCategoria(int id) 
-        {
-            var categoria = await _appDbContext.Categorias.FindAsync(id);
-            if(categoria == null)
-            {
-                return NotFound("Categoria não encontrada.");
-            }
+            var categoria = await _service.ListarTodas();
             return Ok(categoria);
         }
 
-        [HttpPost("/api/categorias")]
-        public async Task<ActionResult<Categoria>> CriarCategoria(Categoria categoria)
+        [HttpGet("/api/categorias/{id}")]
+        public async Task<IActionResult> GetCategoria(int id) 
         {
-            _appDbContext.Categorias.Add(categoria);
-            await _appDbContext.SaveChangesAsync();
+            var categoria = await _service.BuscarPorId(id);
+            return categoria == null ? NotFound("Categoria não encontrada") : Ok(categoria);
+        }
 
-            return CreatedAtAction(nameof(GetCategoria), new { id = categoria.Id }, categoria);
+        [HttpPost("/api/categorias")]
+        public async Task<IActionResult> CriarCategoria(Categoria categoria)
+        {
+            var criada = await _service.Criar(categoria);
+
+            return CreatedAtAction(nameof(GetCategoria), new { id = criada.Id }, criada);
         }
     
         [HttpPut("/api/categorias/{id}")]
-        public async Task<ActionResult> AtualizarCategoria(int id, Categoria categoriaDto)
+        public async Task<IActionResult> AtualizarCategoria(int id, Categoria categoria)
         {
-            var categoria = await _appDbContext.Categorias.FindAsync(id);
-
-            if (categoria == null)
-                return NotFound("Categoria não encontrada");
-
-            if (id != categoriaDto.Id) { return NotFound("Dados inválidos"); }
-
-            categoria.Nome = categoriaDto.Nome;
-            categoria.Descricao = categoriaDto.Descricao;
-
-            await _appDbContext.SaveChangesAsync();
-
-            return NoContent();
+            var upd = await _service.Atualizar(id, categoria);
+            return upd ? NoContent() : BadRequest("Não foi possível atualizar a categoria");
         }
         
         [HttpDelete("/api/categorias/{id}")]
         public async Task<ActionResult> DeletarCategoria(int id) 
         {
-            var categoria = await _appDbContext.Categorias.
-            Include(c => c.Produtos).FirstOrDefaultAsync(c => c.Id == id );
+            var del = await _service.Deletar(id);
             
-            if (categoria == null) { return NotFound("Categoria não encontrada."); }
+            if(!del) { return BadRequest(); }
 
-            if (categoria.Produtos.Any())
-            {
-                return Conflict();
-            }
-
-            _appDbContext.Categorias.Remove(categoria);
-            await _appDbContext.SaveChangesAsync();
-
-            return NoContent();
+            return del ? NoContent() : NotFound("Categoria não encontrada");
         }
         
     }
