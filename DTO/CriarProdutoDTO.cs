@@ -12,8 +12,13 @@ namespace FluxoDeEstoque.DTO
         [Required]
         public int QuantidadeEmStock { get; set; }
         [Required]
+        public string SKU { get; set; }
+        [Required]
+        public string DescricaoDetalhada { get; set; }
+        [Required]
         public int StockMinimo { get; set; }
         [Required]
         public int CategoriaId { get; set; }
+        public List<IFormFile>? Urls { get; set; }
     }
 }

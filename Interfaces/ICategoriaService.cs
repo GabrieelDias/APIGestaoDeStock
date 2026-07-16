@@ -1,7 +1,7 @@
 ﻿using FluxoDeEstoque.Models;
 using System.Collections;
 
-namespace FluxoDeEstoque.Services
+namespace FluxoDeEstoque.Interfaces
 {
     public interface ICategoriaService
     {

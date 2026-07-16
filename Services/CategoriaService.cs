@@ -1,4 +1,5 @@
-﻿using FluxoDeEstoque.Models;
+﻿using FluxoDeEstoque.Interfaces;
+using FluxoDeEstoque.Models;
 using FluxoDeEstoque.Repository;
 
 namespace FluxoDeEstoque.Services

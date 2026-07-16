@@ -1,4 +1,5 @@
 ﻿using FluxoDeEstoque.Data;
+using FluxoDeEstoque.Interfaces;
 using FluxoDeEstoque.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

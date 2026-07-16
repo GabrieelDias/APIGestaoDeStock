@@ -1,5 +1,6 @@
 ﻿using FluxoDeEstoque.Data;
 using FluxoDeEstoque.DTO;
+using FluxoDeEstoque.Interfaces;
 using FluxoDeEstoque.Models;
 using FluxoDeEstoque.Services;
 using Microsoft.AspNetCore.Http;
@@ -14,10 +15,12 @@ namespace FluxoDeEstoque.Controllers
     public class ProdutosController : ControllerBase
     {
         private readonly IProdutoService _service;
+        private readonly IProdutoRepository _repo;
 
-        public ProdutosController(IProdutoService service)
+        public ProdutosController(IProdutoService service, IProdutoRepository repo)
         {
             _service = service;
+            _repo = repo;
         }
 
         [HttpGet("/api/produtos")]
@@ -31,7 +34,8 @@ namespace FluxoDeEstoque.Controllers
         public async Task<IActionResult> GetProduto(int id)
         {
             var prod = await _service.BuscarPorId(id);
-            return prod == null ? NotFound("Produto não encontrado") : Ok(prod); 
+            if (prod == null) return NotFound("Produto não encontrado");
+            return Ok(prod);
         }
 
         [HttpGet("/api/produtos/pesquisa")] 
@@ -49,16 +53,18 @@ namespace FluxoDeEstoque.Controllers
         }
 
         [HttpPost("/api/produtos")]
-        public async Task<IActionResult> PostProduto( [FromBody] CriarProdutoDTO dto) 
+        public async Task<IActionResult> PostProduto( [FromForm] CriarProdutoDTO dto) 
         {
-            var prod = await _service.CriarProduto(dto);
+            string baseUrl = $"{Request.Scheme}://{Request.Host}";
+            
+            var prod = await _service.CriarProduto(dto, baseUrl);
             if (prod == null) return BadRequest("Não foi possível cadastrar o produto.");
 
             return CreatedAtAction(nameof(GetProduto), new { id = prod.Id }, prod);
         }
 
         [HttpPut("/api/produtos/{id}")]
-        public async Task<IActionResult> PutProduto(int id, [FromBody] CriarProdutoDTO produtoDTO) 
+        public async Task<IActionResult> PutProduto(int id, [FromForm] CriarProdutoDTO produtoDTO) 
         {
             var prod = await _service.Atualizar(id, produtoDTO);
             return prod ? NoContent() : NotFound("Produto não encontrado");
@@ -78,6 +84,5 @@ namespace FluxoDeEstoque.Controllers
             if(!prod) { return BadRequest("Valores negativos não são aceitos");}
             return NoContent();
         }
-
     }
 }

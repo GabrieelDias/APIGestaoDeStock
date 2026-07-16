@@ -1,7 +1,7 @@
 ﻿using FluxoDeEstoque.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FluxoDeEstoque.Repository
+namespace FluxoDeEstoque.Interfaces
 {
     public interface ICategoriaRepository
     {

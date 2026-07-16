@@ -2,14 +2,14 @@
 using FluxoDeEstoque.Models;
 using System.Collections;
 
-namespace FluxoDeEstoque.Services
+namespace FluxoDeEstoque.Interfaces
 {
     public interface IProdutoService
     {
         Task<IEnumerable<Produto>> ListarTodos();
         Task<Produto?> BuscarPorId(int id);
         Task<IEnumerable<Produto>> FiltrarNome(string nome);
-        Task<Produto?> CriarProduto(CriarProdutoDTO dto);
+        Task<Produto?> CriarProduto(CriarProdutoDTO dto, string baseUrl);
         Task<bool> Atualizar(int id, CriarProdutoDTO dto);
         Task<bool> Delete(int id);
         Task<bool> AjustarEstoque(int id, AjustarQuantidadeDTO dto);
